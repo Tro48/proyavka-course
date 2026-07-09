@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+/**
+ * Страница целиком — проявочная. Светлой половины и перехода в бумагу нет:
+ * тёмный сайт тёмный от героя до футера. Белым остаётся только то, что белое
+ * и в жизни, — поля отпечатков в контрольном листе.
+ *
+ * Все контрасты ниже замерены на фоне darkroom.
+ */
+@theme {
+  --color-darkroom: #14100f; /* фон страницы */
+  --color-surface: #1b1614; /* карточки, поля ввода, липкая панель */
+
+  /* ВНИМАНИЕ: контраст safelight на darkroom — 2.22:1 (замерено).
+     Это цвет КРАСНОГО ФОНАРЯ: свечения, рамки, декоративные элементы.
+     Как цвет текста НЕ ИСПОЛЬЗОВАТЬ ни при каком размере — не прочитается.
+     Для текста и активных состояний есть --color-glow. */
+  --color-safelight: #8c2a22;
+
+  /* Акцент: ссылки, цифры таймера, фон кнопок. 5.32:1 на darkroom и 5.05:1
+     на surface — AA для текста любого размера.
+     Исходный #C4402F из плана даёт всего 3.71:1: мелкая подпись им не
+     набирается, и Lighthouse справедливо снимал балл. */
+  --color-glow: #e0603f;
+
+  /* Основной текст — 17.8:1. Он же белые поля отпечатков. */
+  --color-paper: #faf8f5;
+
+  /* Только фон: paper на нём — 5.85:1. Как цвет текста на тёмном terracotta
+     даёт 3.05:1 и не годится. */
+  --color-terracotta: #a83e28;
+
+  /* Тёмно-красный #B3261E из палитры на тёмном фоне даёт 2.89:1 и не читается.
+     Осветлён до 6.26:1. */
+  --color-danger: #ef6b62;
+
+  /* Текст на белых полях отпечатка: контрольный лист и лайтбокс. */
+  --color-ink: #1c1a17; /* на paper — 16.4:1 */
+  --color-graphite: #6b6459; /* на paper — 5.5:1 */
+
+  /* ── Типографика ─────────────────────────────────────────────────────── */
+  --font-display: var(--font-cormorant), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", monospace;
+
+  --text-hero: clamp(2.5rem, 6.5vw, 5rem);
+  --text-hero--line-height: 1.05;
+  --text-h2: clamp(1.75rem, 3.5vw, 2.75rem);
+  --text-h2--line-height: 1.1;
+  --text-h3: clamp(1.125rem, 1.8vw, 1.375rem);
+  --text-h3--line-height: 1.3;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.7;
+  --text-mono: 0.875rem;
+  --text-mono--line-height: 1.4;
+
+  /* Фотобумагу не скругляют. */
+  --radius-sheet: 2px;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background-color: var(--color-darkroom);
+  }
+
+  body {
+    background-color: var(--color-darkroom);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Моноширинный шрифт нужен ради цифр, а цифры нужны неподвижные:
+     иначе таймер дёргает макет каждую секунду, потому что «1» уже «8».
+     font-variant-numeric наследуется, поэтому одного правила хватает. */
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Видимый фокус обязателен. Никаких outline: none. */
+  :focus-visible {
+    outline: 2px solid var(--color-glow);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-glow);
+    color: var(--color-darkroom);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
