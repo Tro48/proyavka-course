@@ -12,8 +12,40 @@ export const contentType = "image/png";
 /** Картинка живёт столько же, сколько страница: дата старта на ней настоящая. */
 export const revalidate = 60;
 
+/**
+ * Встроенный шрифт `next/og` кириллицу не покрывает: без своего файла весь
+ * русский текст на картинке вышел бы «квадратами». Подгружаем Inter из Google
+ * Fonts прямо при генерации. Файл в репозитории не храним — как и остальные
+ * шрифты (см. CREDITS.md), а `text` отдаёт крохотный субсет ровно под нужные
+ * глифы. Запрос делается на сборке/ревалидации (revalidate = 60), не на
+ * открытии страницы.
+ */
+const GLYPHS =
+  "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя" +
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" +
+  "0123456789 ·—–,.:;%()«»/№-!?";
+
+async function loadInter(): Promise<ArrayBuffer | null> {
+  try {
+    // Без браузерного User-Agent Google Fonts отдаёт TTF, а не woff2, —
+    // именно то, что умеет разбирать satori под капотом `ImageResponse`.
+    const cssUrl = `https://fonts.googleapis.com/css2?family=Inter:wght@400&text=${encodeURIComponent(GLYPHS)}`;
+    const css = await fetch(cssUrl).then((res) => res.text());
+    const src = css.match(/src: url\((.+?)\) format\('(?:opentype|truetype)'\)/)?.[1];
+    if (!src) throw new Error("в ответе Google Fonts нет TTF");
+
+    return await fetch(src).then((res) => res.arrayBuffer());
+  } catch (error) {
+    // OG-картинка некритична: пусть лучше выйдет без кириллицы, чем упадёт весь
+    // роут. При ошибке ISR всё равно отдаст прошлую удачную версию.
+    console.error("Не удалось загрузить шрифт для OG-картинки", error);
+    return null;
+  }
+}
+
 export default async function Image() {
   const copy = getCohortCopy(resolveCohortState(new Date(), cohorts));
+  const inter = await loadInter();
 
   return new ImageResponse(
     <div
@@ -24,6 +56,7 @@ export default async function Image() {
         width: "100%",
         height: "100%",
         padding: "72px",
+        fontFamily: "Inter",
         backgroundColor: "#14100F",
         backgroundImage:
           "radial-gradient(circle at 22% 30%, rgba(140,42,34,0.45), transparent 55%)",
@@ -56,6 +89,9 @@ export default async function Image() {
         </div>
       </div>
     </div>,
-    size,
+    {
+      ...size,
+      fonts: inter ? [{ name: "Inter", data: inter, style: "normal", weight: 400 }] : [],
+    },
   );
 }

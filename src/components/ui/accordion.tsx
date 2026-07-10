@@ -3,7 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Accordion as RadixAccordion } from "radix-ui";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -63,8 +63,11 @@ export function Accordion({ items, defaultOpen = "", className }: AccordionProps
                   "hover:text-glow py-5 text-left transition-colors",
                 )}
               >
-                {item.trigger}
-                <Chevron open={isOpen} duration={duration} />
+                {/* Radix прокидывает эти два ребёнка внутрь `Primitive.button`
+                    уже как массив-список — без явных ключей React ругается на
+                    «unique key». Fragment прозрачен для flex-раскладки. */}
+                <Fragment key="trigger">{item.trigger}</Fragment>
+                <Chevron key="chevron" open={isOpen} duration={duration} />
               </RadixAccordion.Trigger>
             </RadixAccordion.Header>
 
