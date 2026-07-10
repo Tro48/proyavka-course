@@ -11,11 +11,11 @@ export function Segments() {
           title="Три ситуации, в которых сюда приходят"
         />
 
-        <ul className="mt-14 grid gap-6 md:grid-cols-3">
+        <ul className="mt-14 grid gap-6 md:grid-cols-3 md:grid-rows-[auto_1fr_auto] md:gap-y-5">
           {segments.map((segment) => (
             <li
               key={segment.id}
-              className="rounded-sheet border-paper/12 flex flex-col gap-5 border p-8"
+              className="rounded-sheet border-paper/12 flex flex-col gap-5 border p-8 md:row-span-3 md:grid md:grid-rows-subgrid"
             >
               <blockquote className="font-display text-h3 text-paper font-semibold text-balance">
                 «{segment.quote}»
@@ -23,7 +23,7 @@ export function Segments() {
 
               <p className="text-paper/60 text-sm">{segment.body}</p>
 
-              <p className="border-paper/12 text-paper/75 mt-auto border-t pt-5 text-sm">
+              <p className="border-paper/12 text-paper/75 border-t pt-5 text-sm">
                 {segment.shift}
               </p>
             </li>
